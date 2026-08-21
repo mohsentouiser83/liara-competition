@@ -112,7 +112,7 @@ export async function POST(request: Request) {
         const nextAction = agentTurn.clarification
           ? "پاسخ این سؤال تکمیلی را بفرستید تا عیب‌یابی با شواهد دقیق‌تر ادامه پیدا کند."
           : nextActionFor(latest, intent);
-        const sources = agentTurn.clarification ? [] : mapEvidenceSources(evidence);
+        const sources = mapEvidenceSources(evidence);
         controller.enqueue(line({
           type: "done",
           sources,

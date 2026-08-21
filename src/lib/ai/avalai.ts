@@ -27,7 +27,7 @@ export class AvalAIProvider implements AIProvider {
       stream: true,
       stream_options: { include_usage: true },
       temperature: 0.2,
-      max_tokens: 900,
+      max_tokens: 1400,
       messages: [{ role: "system", content: buildSystemPrompt(input) }, ...input.messages.slice(-8)]
     });
     let response: Response | undefined;
@@ -86,10 +86,12 @@ export class AvalAIProvider implements AIProvider {
 
 async function* demoResponse(input: ProviderInput): AsyncIterable<string> {
   let answer: string;
-  if (input.clarification) {
-    answer = input.clarification;
-  } else if (!input.evidence.length) {
-    answer = "برای پاسخ قابل اتکا، هنوز اطلاعات کافی در مستندات بازیابی‌شده ندارم. سؤال‌تان مربوط به کدام سرویس لیارا و چه فریم‌ورکی است؟";
+  if (!input.evidence.length) {
+    const question = input.clarification
+      ?? (input.intent === "debug"
+        ? "این مشکل برای کدام سرویس لیارا رخ می‌دهد و متن دقیق خطا چیست؟"
+        : "دقیقاً روی کدام سرویس یا قابلیت لیارا کار می‌کنید؟");
+    answer = `حتماً کمک‌تان می‌کنم. برای اینکه مستقیم سراغ راه‌حل درست برویم، یک جزئیات لازم دارم: ${question}`;
   } else {
     const snippets = input.evidence.slice(0, 3).map((document) => {
       const clean = document.content
@@ -97,7 +99,7 @@ async function* demoResponse(input: ProviderInput): AsyncIterable<string> {
         .replace(/\s+/g, " ")
         .trim();
       const sentences = clean.split(/(?<=[.!؟؛])\s+/u).filter(Boolean);
-      const excerpt = sentences.slice(0, 2).join(" ").slice(0, 360).trim();
+      const excerpt = sentences.slice(0, 3).join(" ").slice(0, 520).trim();
       return `• ${document.section}: ${excerpt}`;
     });
     if (input.intent === "debug") {
@@ -107,6 +109,7 @@ async function* demoResponse(input: ProviderInput): AsyncIterable<string> {
     } else {
       answer = `بر اساس بخش‌های مرتبط مستندات لیارا:\n\n${snippets.join("\n\n")}\n\nبرای جزئیات و دستورات کامل، منابع زیر را باز کنید.`;
     }
+    if (input.clarification) answer += `\n\nبرای اینکه راهنمایی را دقیق‌تر ادامه بدهم: ${input.clarification}`;
   }
 
   const characters = Array.from(answer);
