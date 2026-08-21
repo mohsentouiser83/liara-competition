@@ -1,0 +1,34 @@
+[
+  {
+    "question": "چطور یک دیتابیس Redis روی لیارا بسازم؟",
+    "expectedPath": "dbaas/redis/quick-setup.mdx"
+  },
+  {
+    "question": "روش استقرار برنامه Next.js در لیارا چیست؟",
+    "expectedPath": "paas/nextjs/how-tos/deploy-app.mdx"
+  },
+  {
+    "question": "چطور متغیر محیطی Next.js را تنظیم کنم؟",
+    "expectedPath": "paas/nextjs/how-tos/set-envs.mdx"
+  },
+  {
+    "question": "چطور دامنه را به برنامه‌ام وصل کنم؟",
+    "expectedPathPrefix": "paas/domains/"
+  },
+  {
+    "question": "برای Node.js خطای CORS دارم",
+    "expectedPathPrefix": "paas/nodejs/fix-common-errors/cors-error/"
+  },
+  {
+    "question": "چطور فضای ذخیره‌سازی ابری بسازم؟",
+    "expectedPath": "object-storage/quick-setup.mdx"
+  },
+  {
+    "question": "راه‌اندازی ایمیل سرور لیارا چطور است؟",
+    "expectedPath": "email-server/quick-setup.mdx"
+  },
+  {
+    "question": "آب و هوای امروز تهران چیست؟",
+    "expectNoEvidence": true
+  }
+]

@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm docs:sync
+      - run: pnpm rag:ingest
+      - run: pnpm rag:evaluate
+      - run: pnpm agent:evaluate
+      - run: pnpm build
+      - run: docker build -t liara-copilot:ci .
+
+  prepare-production:
+    needs: verify
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+      DATABASE_SSL_MODE: ${{ vars.DATABASE_SSL_MODE || 'verify-full' }}
+      AVALAI_API_KEY: ${{ secrets.AVALAI_API_KEY }}
+      AVALAI_BASE_URL: ${{ vars.AVALAI_BASE_URL || 'https://api.avalai.ir/v1' }}
+      AVALAI_EMBEDDING_MODEL: ${{ vars.AVALAI_EMBEDDING_MODEL }}
+      EMBEDDING_PROVIDER: avalai
+      EMBEDDING_DIMENSIONS: 1536
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Validate production data configuration
+        run: test -n "$DATABASE_URL" && test -n "$AVALAI_API_KEY" && test -n "$AVALAI_EMBEDDING_MODEL"
+      - name: Apply database migrations
+        run: pnpm db:migrate
+      - name: Sync Liara documentation
+        run: pnpm docs:sync
+      - name: Build production knowledge base
+        run: pnpm rag:ingest -- --prune
+
+  deploy:
+    needs: prepare-production
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
+      LIARA_APP_NAME: ${{ vars.LIARA_APP_NAME }}
+      LIARA_APP_URL: ${{ vars.LIARA_APP_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate deployment configuration
+        run: test -n "$LIARA_TOKEN" && test -n "$LIARA_APP_NAME" && test -n "$LIARA_APP_URL"
+      - name: Install Liara CLI
+        run: npm install --global @liara/cli@9
+      - name: Deploy verified Docker application
+        run: liara deploy --app="$LIARA_APP_NAME" --platform=docker --port=3000 --api-token="$LIARA_TOKEN" --no-app-logs
+      - name: Verify production readiness
+        run: |
+          for attempt in $(seq 1 18); do
+            if curl --fail --silent --show-error "$LIARA_APP_URL/health"; then exit 0; fi
+            sleep 10
+          done
+          exit 1
