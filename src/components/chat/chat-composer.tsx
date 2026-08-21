@@ -42,11 +42,17 @@ export function ChatComposer({ error, input, isStreaming, onInput, onRetry, onSt
         />
         <div className="composer-tools">
           <span className="composer-hint">Enter برای ارسال · Shift + Enter برای خط جدید</span>
-          {isStreaming ? (
-            <button className="send-button" type="button" onClick={onStop} aria-label="توقف پاسخ"><Icons.stop size={17} /></button>
-          ) : (
-            <button className="send-button" type="submit" disabled={!input.trim()} aria-label="ارسال پیام"><Icons.send size={17} /></button>
-          )}
+          <button
+            className="send-button"
+            data-streaming={isStreaming}
+            type={isStreaming ? "button" : "submit"}
+            onClick={isStreaming ? onStop : undefined}
+            disabled={!isStreaming && !input.trim()}
+            aria-label={isStreaming ? "توقف پاسخ" : "ارسال پیام"}
+          >
+            <span className="send-icon send-icon-submit"><Icons.send size={17} /></span>
+            <span className="send-icon send-icon-stop"><Icons.stop size={17} /></span>
+          </button>
         </div>
         {error ? (
           <div className="error-banner" role="alert">

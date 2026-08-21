@@ -40,13 +40,14 @@ export function ChatWorkspace() {
         <header className="topbar">
           <div className="topbar-title">
             <button className="icon-button mobile-menu" type="button" aria-label="باز کردن منو" onClick={() => setMobileOpen(true)}><Icons.menu size={18} /></button>
-            <span className="status-dot" aria-hidden="true" />
+            <span className="status-dot" data-busy={isStreaming} aria-hidden="true" />
             <span>{conversationTitle(messages)}</span>
           </div>
           <div className="topbar-actions">
             <span className="mode-badge"><Icons.book size={14} /> متصل به مستندات لیارا</span>
-            <button className="icon-button" type="button" onClick={toggleTheme} aria-label={theme === "light" ? "فعال‌کردن حالت تاریک" : "فعال‌کردن حالت روشن"}>
-              {theme === "light" ? <Icons.moon size={17} /> : <Icons.sun size={17} />}
+            <button className="icon-button theme-toggle" data-theme-mode={theme} type="button" onClick={toggleTheme} aria-label={theme === "light" ? "فعال‌کردن حالت تاریک" : "فعال‌کردن حالت روشن"}>
+              <span className="theme-icon theme-icon-moon"><Icons.moon size={17} /></span>
+              <span className="theme-icon theme-icon-sun"><Icons.sun size={17} /></span>
             </button>
           </div>
         </header>

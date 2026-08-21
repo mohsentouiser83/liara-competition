@@ -20,7 +20,7 @@ export function Message({ message }: { message: ChatMessage }) {
   }
 
   return (
-    <article className={`message ${message.role}`}>
+    <article className={`message ${message.role}`} data-pending={message.pending || undefined} aria-busy={message.pending || undefined}>
       <div className={`avatar ${isAssistant ? "ai" : "user"}`} aria-hidden="true">{isAssistant ? <Icons.spark size={15} /> : "شما"}</div>
       <div className="message-body">
         <div className="message-label">{isAssistant ? "Liara Copilot" : "شما"}</div>

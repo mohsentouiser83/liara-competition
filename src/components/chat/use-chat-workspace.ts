@@ -148,6 +148,7 @@ export function useChatWorkspace() {
         if (event.type === "meta" && event.messageId !== assistantId) {
           throw new Error("شناسه پاسخ سرویس معتبر نیست.");
         }
+        if (event.type === "done") completed = true;
         setMessages((current) => current.map((message) => {
           if (message.id !== assistantId) return message;
           if (event.type === "meta") {
@@ -158,10 +159,7 @@ export function useChatWorkspace() {
           }
           if (event.type === "tool") return { ...message, tools: [...(message.tools ?? []), { name: event.name, resultCount: event.resultCount }] };
           if (event.type === "delta") return { ...message, content: message.content + event.text };
-          if (event.type === "done") {
-            completed = true;
-            return { ...message, sources: event.sources, nextAction: event.nextAction, pending: false };
-          }
+          if (event.type === "done") return { ...message, sources: event.sources, nextAction: event.nextAction, pending: false };
           return message;
         }));
       }

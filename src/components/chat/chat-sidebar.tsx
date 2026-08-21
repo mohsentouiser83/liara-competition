@@ -13,7 +13,14 @@ type Props = {
 export function ChatSidebar({ activeConversationId, conversations, mobileOpen, onClose, onNewChat, onOpenConversation }: Props) {
   return (
     <>
-      {mobileOpen ? <button className="sidebar-backdrop" type="button" aria-label="بستن منو" onClick={onClose} /> : null}
+      <button
+        className={`sidebar-backdrop ${mobileOpen ? "open" : ""}`}
+        type="button"
+        aria-label="بستن منو"
+        aria-hidden={!mobileOpen}
+        tabIndex={mobileOpen ? 0 : -1}
+        onClick={onClose}
+      />
       <aside className={`sidebar ${mobileOpen ? "open" : ""}`} aria-label="نوار کناری">
         <div className="brand">
           <div className="brand-mark"><LiaraMark size={30} /></div>
